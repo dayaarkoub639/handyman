@@ -65,6 +65,8 @@ Route::post('service-reviews', [ API\ServiceController::class, 'serviceReviewsLi
 Route::get('post-job-status', [ API\PostJobRequestController::class, 'postRequestStatus' ] );
 
 // Route::get('booking-list', [ API\BookingController::class, 'getBookingList' ] );
+Route::get('frequences', [ API\BookingController::class, 'frequences' ] );
+Route::get('frequencesToutes', [ API\BookingController::class, 'frequencesToutes' ] );
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('service-save', [ App\Http\Controllers\ServiceController::class, 'store' ] );
@@ -79,6 +81,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('provider-dashboard',[ API\DashboardController::class, 'providerDashboard' ]);
     Route::get('admin-dashboard',[ API\DashboardController::class, 'adminDashboard' ]);
     Route::get('booking-list', [ API\BookingController::class, 'getBookingList' ] );
+      
     Route::post('booking-detail', [ API\BookingController::class, 'getBookingDetail' ] );
     Route::post('save-booking-rating', [ API\BookingController::class, 'saveBookingRating' ] );
     Route::post('delete-booking-rating', [ API\BookingController::class, 'deleteBookingRating' ] );

@@ -434,6 +434,78 @@ class BookingController extends Controller
            $res->parent_id = $res->id;
            $res->update();
         }
+
+        if($data['status'] == 'accept'){
+            //  dd($bookingdata);
+           $frequence = $bookingdata['frequency'];  
+              
+               $datePreviousSession = Carbon::parse($bookingdata['date']);
+               $dateProchaine ;  //on recupre la date prochaine de la session
+       
+               switch ($frequence) {
+                   case 'semaine':
+                       $dateProchaine = $datePreviousSession->copy()->addWeeks(1);
+                   break;
+       
+                   case 'deux_semaines': 
+                       $dateProchaine = $datePreviousSession->copy()->addWeeks(2);
+                   break;
+       
+                   case 'mois': 
+                       $dateProchaine = $datePreviousSession->copy()->addWeeks(5);
+       
+                   break;
+               } 
+              
+              $otherController = new BookingClr();
+                $requestData = [
+                  "id" => 0,
+                  "category_id" => $bookingdata['category_id'],
+                  "provider_id" => $bookingdata['provider_id'],
+                  "price" => $bookingdata['price'],
+                  "quantity" => $bookingdata['quantity'],
+                  "type" => $bookingdata['type'],
+                  "date" => Carbon::parse($dateProchaine),
+                  "booking_slot" => $bookingdata['booking_slot'],
+                  "booking_day" => $bookingdata['booking_day'],
+                  "is_slot" => $bookingdata['is_slot'],
+                  "subcategory_name" => $bookingdata['subcategory_name'],
+                  "discount" => $bookingdata['discount'],
+                  "duration" => $bookingdata['duration'],
+                  "status" => "waiting",
+                  "description" => $bookingdata['description'],
+                  "is_featured" => $bookingdata['is_featured'],
+                  "frequency" => $bookingdata['frequency'],
+                  "have_animals" => $bookingdata['have_animals'],
+                  "hours_availables" => json_decode($bookingdata['hours_availables'],true),
+                  "provider_name" => $bookingdata['provider_name'],
+                  "category_name" => $bookingdata['category_name'],
+                  "attachments" => $bookingdata['attachments'],
+                  "total_review" => $bookingdata['total_review'],
+                  "total_rating" => $bookingdata['total_rating'],
+                  "is_favourite" => $bookingdata['is_favourite'],
+                  "city_id" => $bookingdata['city_id'],
+                  "provider_image" => $bookingdata['provider_image'],
+                  "service_address_mapping" => $bookingdata['service_address_mapping'],
+                  "booking_slots" => $bookingdata['booking_slots'],
+                  "created_at" => $bookingdata['created_at'],
+                  "customer_name" => $bookingdata['customer_name'],
+                  "customer_id" => $bookingdata['customer_id'],
+                  "service_attachments" => $bookingdata['service_attachments'],
+                  "service_id" => $bookingdata['service_id'],
+                  "user_id" => $bookingdata['user_id'],
+                  "servicePackage" => $bookingdata['servicePackage'],
+                  "isEnableAdvancePayment" => $bookingdata['isEnableAdvancePayment'],
+                  "advancePaymentPercentage" => $bookingdata['advancePaymentPercentage'],
+                  "advancePaymentAmount" => $bookingdata['advancePaymentAmount'],
+                  "attachments_array" => $bookingdata['attachments_array'],
+                  "visit_type" => $bookingdata['visit_type'],
+                  "coupon_id" => $bookingdata['coupon_id']];
+  
+                $request = Request::create('/store', 'POST', $requestData);
+                $otherController->store($request);
+                $message = 'accept prochaine session cree automatique';
+          }
         $message = __('messages.update_form',[ 'form' => __('messages.booking') ] );
 
         if($request->is('api/*')) {
@@ -455,7 +527,118 @@ class BookingController extends Controller
 
         return comman_message_response($message);
     }
-
+    public function frequencesToutes(Request $request){
+        // Validation des paramètres
+         
+         // Récupération des paramètres
+         //reinit pour tests
+       $Currentdate  =Carbon::now(); 
+         // a apartir de date debut session et a partir de current date 
+         // IMPORTANT on n'affiche pas les anciens sessions precedente
+         
+         $dateDebutSession = Carbon::create(2024, 11, 25);  
+         $frequence = "semaine";
+     
+   
+  
+         // Calcul des prochaines 5 dates en fonction de la fréquence
+         $dates = [];
+ 
+         // Déterminer la fréquence
+         switch ($frequence) {
+             case 'semaine':
+                   // Vérifier que la date de début n'est pas dans le futur
+                   if ($dateDebutSession > $Currentdate) {
+                     $nombreDeWeeks =  0; // Pas de session passée si la date de début est future
+                 }
+ 
+                 // Calcul du nombre de mois
+                 $nombreDeWeeks = $dateDebutSession->diffInWeeks($Currentdate);
+                 for ($i = 0; $i < ($nombreDeWeeks)+6; $i++) {   
+                     $date = $dateDebutSession->copy()->addWeeks($i );
+             
+                     // Ajouter uniquement les dates futures (supérieures à la date actuelle)
+                     if ($date->greaterThan($Currentdate) && count($dates) < 5) {
+                         $dates[] = $date->format('l d-m-Y');
+                     }
+                 }
+ 
+             case 'deux_semaines':
+                  
+                 // Vérifier que la date de début n'est pas dans le futur
+                 if ($dateDebutSession > $Currentdate) {
+                     $nombreDeWeeks =  0; // Pas de session passée si la date de début est future
+                 }
+ 
+                 // Calcul du nombre de mois
+                 $nombreDeWeeks = $dateDebutSession->diffInWeeks($Currentdate);
+                 for ($i = 0; $i < ($nombreDeWeeks*2)+6; $i++) {   
+                     // Ajouter le nombre de mois à la date de début de session
+                     $date = $dateDebutSession->copy()->addWeeks($i*2);
+             
+                     // Ajouter uniquement les dates futures (supérieures à la date actuelle)
+                     if ($date->greaterThan($Currentdate) && count($dates) < 5) {
+                         $dates[] = $date->format('l d-m-Y');
+                     }
+                 }
+                 break;
+ 
+             case 'mois': 
+                 // Vérifier que la date de début n'est pas dans le futur
+                 if ($dateDebutSession > $Currentdate) {
+                     $nombreDeMois =  0; // Pas de session passée si la date de début est future
+                 }
+ 
+                 // Calcul du nombre de mois
+                 $nombreDeMois = $dateDebutSession->diffInMonths($Currentdate);
+                 for ($i = 0; $i < $nombreDeMois+6; $i++) {  
+                     $date = $dateDebutSession->copy()->addWeeks($i*5);
+             
+                     // Ajouter uniquement les dates futures (supérieures à la date actuelle)
+                     if ($date->greaterThan($Currentdate) && count($dates) < 5) {
+                         $dates[] = $date->format('l d-m-Y');
+                     }
+                 }
+                 break;
+ 
+             default:
+                 return response()->json(['error' => 'Fréquence invalide'], 400);
+         }
+ 
+         return response()->json(['dates' => $dates]);
+ 
+     }
+ 
+ 
+     public function frequences(Request $request){
+     
+         $frequence = "semaine";
+         // Calcul des prochaine 1 date en fonction de la fréquence
+         $dateProchaine ; 
+         $datePreviousSession = Carbon::create(2024, 11, 25);  
+ 
+         switch ($frequence) {
+             case 'semaine':
+                 $dateProchaine = $datePreviousSession->copy()->addWeeks(1);
+             break;
+ 
+             case 'deux_semaines': 
+                 $dateProchaine = $datePreviousSession->copy()->addWeeks(2);
+             break;
+ 
+             case 'mois': 
+                 $dateProchaine = $datePreviousSession->copy()->addWeeks(5);
+ 
+             break;
+ 
+             default:  $dateProchaine = "error";
+         }
+       
+         return response()->json(['dateProchaine' => $dateProchaine]);
+  
+ 
+ 
+     }
     public function getHandymanRatingList(Request $request){
 
         $handymanratings = HandymanRating::orderBy('id','desc');

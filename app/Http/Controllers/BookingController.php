@@ -830,10 +830,71 @@ class BookingController extends Controller
         $global_advance_payment = isset($serviceconfig->global_advance_payment) ? $serviceconfig->global_advance_payment : 0;
         $bookingdata->service->is_enable_advance_payment = $bookingdata->service->type == 'fixed' ? ($bookingdata->service->is_enable_advance_payment == 1 ? $bookingdata->service->is_enable_advance_payment : $global_advance_payment ) : 0;
         $bookingdata->service->advance_payment_amount = $bookingdata->service->type == 'fixed' ? ($bookingdata->service->advance_payment_amount > 0 ? $bookingdata->service->advance_payment_amount : $advancePaymentPercentage ) : 0;
+       
+        $dates_futures = [];
+       
+        if($bookingdata->frequency!='non'){
+            $Currentdate  =Carbon::now();        
+            $dateDebutSession = Carbon::parse($bookingdata->date);  
+            $frequence = $bookingdata->frequency;
+            // Calcul des prochaines 5 dates_futures en fonction de la fréquence
+    
+            // Déterminer la fréquence
+            switch ($frequence) {
+                case 'semaine':
+                    // Vérifier que la date de début n'est pas dans le futur
+                    if ($dateDebutSession > $Currentdate) {
+                        $nombreDeWeeks =  0; // Pas de session passée si la date de début est future
+                    }
+    
+                    // Calcul du nombre de mois
+                    $nombreDeWeeks = $dateDebutSession->diffInWeeks($Currentdate);
+                    for ($i = 0; $i < ($nombreDeWeeks)+6; $i++) {   
+                        $date = $dateDebutSession->copy()->addWeeks($i );
+                
+                        // Ajouter uniquement les dates_futures futures (supérieures à la date actuelle)
+                        if ($date->greaterThan($Currentdate) && count($dates_futures) < 5) {
+                            $dates_futures[] = $date->format('d-m-Y');
+                        }
+                    }
+    
+                case 'deux_semaines':
+                    if ($dateDebutSession > $Currentdate) {
+                        $nombreDeWeeks =  0; 
+                    }
+                   
+                    $nombreDeWeeks = $dateDebutSession->diffInWeeks($Currentdate);
+                    for ($i = 0; $i < ($nombreDeWeeks*2)+6; $i++) {   
+                        $date = $dateDebutSession->copy()->addWeeks($i*2);
+                        if ($date->greaterThan($Currentdate) && count($dates_futures) < 5) {
+                            $dates_futures[] = $date->format('d-m-Y');
+                        }
+                    }
+                    break;
+    
+                case 'mois': 
+                    if ($dateDebutSession > $Currentdate) {
+                        $nombreDeMois =  0; // Pas de session passée si la date de début est future
+                    }
+                    $nombreDeMois = $dateDebutSession->diffInMonths($Currentdate);
+                    for ($i = 0; $i < $nombreDeMois+6; $i++) {  
+                        $date = $dateDebutSession->copy()->addWeeks($i*5);
+                        if ($date->greaterThan($Currentdate) && count($dates_futures) < 5) {
+                            $dates_futures[] = $date->format('d-m-Y');
+                        }
+                    }
+                    break;
+    
+                default:
+                    return response()->json(['error' => 'Fréquence invalide'], 400);
+            }
+      
+        }
+      
         
         switch ($tabpage) {
             case 'info':
-                $data  = view('booking.' . $tabpage, compact('user_data', 'tabpage', 'auth_user', 'bookingdata','payment'))->render();
+                $data  = view('booking.' . $tabpage, compact('user_data', 'tabpage', 'auth_user', 'bookingdata','payment','dates_futures'))->render();
                 break;
             case 'status':
                 $data  = view('booking.' . $tabpage, compact('user_data', 'tabpage', 'auth_user', 'bookingdata','payment'))->render();

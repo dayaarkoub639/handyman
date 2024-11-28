@@ -58,7 +58,7 @@ class DashboardController extends Controller
         $slider = SliderResource::collection(Slider::where('status',1)->paginate($per_page));
 
         $category_section = FrontendSetting::getValueByKey('section_2');
-        $category= CategoryResource::collection( Category::whereIN( 'id' ,$category_section->category_id )->orderBy('name','asc')->paginate(8));
+        $category= CategoryResource::collection( Category::whereIN( 'id' ,$category_section->category_id )->where('status', 1)->orderBy('name','asc')->paginate(8));
 
         $service = Service::where('status',1)->where('service_type','service');
         $service = $service->whereHas('providers', function ($a) use ($request) {

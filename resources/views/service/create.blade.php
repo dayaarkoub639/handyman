@@ -209,6 +209,14 @@
                                             for="is_featured">{{ __('messages.set_as_featured') }}</label>
                                     </div>
                             </div>
+                            <div class="form-group col-md-3">
+                                <div class="custom-control custom-switch">
+                                    {{ Form::checkbox('is_regulier', $servicedata->is_regulier, null,
+                                         ['class' => 'custom-control-input', 'id' => 'is_regulier' ]) }}
+                                    <label class="custom-control-label"
+                                        for="is_regulier">{{ __('messages.set_as_regulier') }}</label>
+                                </div>
+                            </div>
                             <!-- @if(!empty( $digitalservicedata) && $digitalservicedata->value == 1)
                             <div class="form-group col-md-3">
                                 <div class="custom-control custom-switch">

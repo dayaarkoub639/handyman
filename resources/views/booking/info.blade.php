@@ -54,6 +54,9 @@ $datetime = $sitesetup ? json_decode($sitesetup->value) : null;
             <p><span>{{__('messages.amount')}} :
                 </span><strong>{{!empty($bookingdata->total_amount) ? getPriceFormat($bookingdata->total_amount): 0}}</strong>
             </p>
+            <p ><span class="text-danger mb-2">Avec Crédit d'impôt -50%:
+                </span><strong>{{!empty($bookingdata->total_amount) ? getPriceFormat($bookingdata->total_amount/2): 0}}</strong>
+            </p>
         </div>
         <div class="pay-booking-details">
             <div class="d-flex justify-content-between mb-2">
@@ -75,7 +78,32 @@ $datetime = $sitesetup ? json_decode($sitesetup->value) : null;
             <div class="d-flex justify-content-between flex-wrap gap-2">
                 <h5>{{__('messages.booking_date')}} :</h5>
                 <span id="service_schedule__span">{{ date("$datetime->date_format $datetime->time_format", strtotime($bookingdata->date)) ?? '-'}}</span>
+            
             </div>
+            <div class="d-flex justify-content-between flex-wrap gap-2">
+                <h5>Prochaines sessions:</h5>
+                <span id="service_schedule__span">
+                    <ul class="list-info">
+                        @foreach ($dates_futures as $item)
+                            <li>{{ $item }}</li>
+                        @endforeach
+                    </ul>
+                </span>
+            </div>
+           
+            @if($bookingdata->frequency!= "non")
+            <div class="d-flex justify-content-between flex-wrap gap-2">
+                <h5>Fréquence:</h5>
+                <span id="service_schedule__span">{{$bookingdata->frequency}}</span>
+            </div>
+            @endif
+            @if($bookingdata->hours_availables!= null)
+            <div class="d-flex justify-content-between flex-wrap gap-2">
+                <h5>Heures disponibles :</h5>
+                <span id="service_schedule__span">{{ implode(', ', json_decode($bookingdata->hours_availables)) }}</span>
+            </div>
+            @endif
+               
         </div>
     </div>
     <div class="py-3 d-flex gap-3 flex-wrap customer-info-detail mb-2">
@@ -225,7 +253,7 @@ $datetime = $sitesetup ? json_decode($sitesetup->value) : null;
                     $amounttotal = $serviceamount * $quantity;
                     @endphp
                     <td>{{ getPriceFormat($serviceamount) }}</td>
-                    <td>{{ $quantity }}</td>
+                    <td>{{ number_format($quantity, 2) }}</td>
                     <td class="text-end">{{ getPriceFormat($amounttotal) }}</td>
                 </tr>
             </tbody>
@@ -287,7 +315,10 @@ $datetime = $sitesetup ? json_decode($sitesetup->value) : null;
                             <td>{{ __('messages.subtotal_vat') }}</td>
                             <td class="bk-value">{{ getPriceFormat($bookingdata->final_sub_total) ?? 0 }}</td>
                         </tr>
-
+                        <tr class="grand-sub-total">
+                            <td>Avec Crédit impôt <strong  class="bk-value text-danger">-50%</strong></td>
+                            <td class="bk-value text-danger">{{ getPriceFormat($bookingdata->final_sub_total/2) ?? 0 }}</td>
+                        </tr>
                         <tr>
                             <td>{{ __('messages.tax') }}</td>
                             <td class="text-end text-danger">{{ getPriceFormat($bookingdata->final_total_tax) ?? 0  }}</td>
