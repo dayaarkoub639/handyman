@@ -31,6 +31,7 @@ use App\Traits\EarningTrait;
 use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
 use App\Models\Setting;
+use App\Http\Controllers\BookingController  as BookingClr;
 
 class BookingController extends Controller
 {

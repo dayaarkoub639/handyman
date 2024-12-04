@@ -312,7 +312,7 @@ class BookingController extends Controller
         if($request->has('tax') && $request->tax != null) {
             $data['tax'] = json_encode($request->tax);
         }
-
+      
         if($request->coupon_id != null) {
             $coupons = Coupon::with('serviceAdded')->where('code',$request->coupon_id)
                 ->where('expire_date','>',date('Y-m-d H:i'))->where('status',1)
@@ -324,6 +324,10 @@ class BookingController extends Controller
             } else {
                 $data['coupon_id'] = $coupons->id;
             }
+        }
+
+        if(isset($data['hours_availables'])){
+            $data['hours_availables'] = json_encode($data['hours_availables']);
         }
 
         $user=User::where('id',$data['provider_id'])->with('providertype')->first();

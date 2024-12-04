@@ -211,8 +211,7 @@
                             </div>
                             <div class="form-group col-md-3">
                                 <div class="custom-control custom-switch">
-                                    {{ Form::checkbox('is_regulier', $servicedata->is_regulier, null,
-                                         ['class' => 'custom-control-input', 'id' => 'is_regulier' ]) }}
+                                    {{ html()->checkbox('is_regulier', $servicedata->is_regulier)->class('custom-control-input')->id('is_regulier')}}
                                     <label class="custom-control-label"
                                         for="is_regulier">{{ __('messages.set_as_regulier') }}</label>
                                 </div>

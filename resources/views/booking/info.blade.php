@@ -248,9 +248,9 @@ $datetime = $sitesetup ? json_decode($sitesetup->value) : null;
                     </td>
                     @php
                     $serviceamount = $bookingdata->amount ? $bookingdata->amount : 0;
-                    $quantity = $bookingdata->quantity ? $bookingdata->quantity : 1;
+                    $quantity = number_format($bookingdata->quantity, 2) ? number_format($bookingdata->quantity, 2) : 1;
 
-                    $amounttotal = $serviceamount * $quantity;
+                    $amounttotal = $serviceamount * number_format($quantity, 2);
                     @endphp
                     <td>{{ getPriceFormat($serviceamount) }}</td>
                     <td>{{ number_format($quantity, 2) }}</td>
@@ -268,13 +268,13 @@ $datetime = $sitesetup ? json_decode($sitesetup->value) : null;
                             <td>{{ __('messages.price') }}</td>
                             @if($bookingdata->service->type == "hourly")
                             <td class="bk-value">
-                                {{ getPriceFormat($bookingdata->amount) }} * {{ $bookingdata->quantity }} / hr =
+                                {{ getPriceFormat($bookingdata->amount) }} * {{ number_format($bookingdata->quantity, 2)  }} / hr =
                                 {{ getPriceFormat($bookingdata->final_total_service_price) }}
                             </td>
                             @else
                             <td class="bk-value">
-                                {{ getPriceFormat($bookingdata->amount) }} * {{ $bookingdata->quantity }} =
-                                {{ getPriceFormat($bookingdata->amount * $bookingdata->quantity) }}
+                                {{ getPriceFormat($bookingdata->amount) }} * {{ number_format($bookingdata->quantity, 2) }} =
+                                {{ getPriceFormat($bookingdata->amount * number_format($bookingdata->quantity, 2)) }}
                             </td>
                             @endif
                         </tr>
@@ -315,10 +315,7 @@ $datetime = $sitesetup ? json_decode($sitesetup->value) : null;
                             <td>{{ __('messages.subtotal_vat') }}</td>
                             <td class="bk-value">{{ getPriceFormat($bookingdata->final_sub_total) ?? 0 }}</td>
                         </tr>
-                        <tr class="grand-sub-total">
-                            <td>Avec Crédit impôt <strong  class="bk-value text-danger">-50%</strong></td>
-                            <td class="bk-value text-danger">{{ getPriceFormat($bookingdata->final_sub_total/2) ?? 0 }}</td>
-                        </tr>
+                        
                         <tr>
                             <td>{{ __('messages.tax') }}</td>
                             <td class="text-end text-danger">{{ getPriceFormat($bookingdata->final_total_tax) ?? 0  }}</td>
@@ -330,7 +327,10 @@ $datetime = $sitesetup ? json_decode($sitesetup->value) : null;
                                 <h3>{{ getPriceFormat($bookingdata->total_amount) ?? 0  }}</h3>
                             </td>
                         </tr>
-
+                        <tr class="grand-sub-total">
+                            <td>Avec Crédit impôt <strong  class="bk-value text-danger">-50%</strong></td>
+                            <td class="bk-value text-danger">{{ getPriceFormat($bookingdata->total_amount/2) ?? 0 }}</td>
+                        </tr>
                         @if($bookingdata->service->is_enable_advance_payment == 1)
                             <tr>
                                 <td>{{ __('messages.advance_payment_amount') }} ({{ $bookingdata->service->advance_payment_amount }}%)</td>
